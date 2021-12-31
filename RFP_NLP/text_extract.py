@@ -36,10 +36,20 @@ def extract_text(pdf_file: Union[Path, str]) -> str:
     return pdf_content
 
 
-def save_txt_file(extracted_text):
-    pass
+def save_txt_file(extracted_text, fname):
+    fname = fname + ".txt"
+    save_path = Path(TEXT_DIR, fname)
+    with open(str(save_path), "w") as f:
+        f.write(extracted_text)
+    print(f"Text saved as {fname}")
+
+
+def grab_extract_save():
+    pdf_list = get_pdfs(PROPOSAL_DIR)
+    for file in pdf_list:
+        pdf_text = extract_text(file)
+        save_txt_file(pdf_text, Path(file).stem)
 
 
 if __name__ == "__main__":
-    pdf_list = get_pdfs(PROPOSAL_DIR)
-    extract_text(pdf_list[1])
+    grab_extract_save()
