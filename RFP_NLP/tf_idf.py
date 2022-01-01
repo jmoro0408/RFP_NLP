@@ -40,6 +40,8 @@ def calculate_cosine_sim(matrix1, matrix2):
 if __name__ == "__main__":
     txts, titles = get_txts(TEXT_DIR)
     for txt, title in zip(txts, titles):
+        if title in file_token_dict.keys():
+            continue
         tfidf, tfidf_df = tokenize(txt)
-        add_to_tokens_dict(txt, tfidf)
+        add_to_tokens_dict(title, tfidf)
     print(file_token_dict)
