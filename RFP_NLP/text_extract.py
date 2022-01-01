@@ -1,6 +1,7 @@
 from pathlib import Path
 from tika import parser
 from typing import Union
+import inspect
 
 PROPOSAL_DIR = Path(
     r"/Users/jamesmoro/Documents/Python/RFP_NLP/RFP_NLP/data/proposals/raw"
@@ -36,7 +37,13 @@ def extract_text(pdf_file: Union[Path, str]) -> str:
     return pdf_content
 
 
-def save_txt_file(extracted_text, fname):
+def save_txt_file(extracted_text: str, fname: Union[Path, str]):
+    """output text as .txt file
+
+    Args:
+        extracted_text (str): text to write, extracted from target pdf
+        fname (Union[Path, str]): target save path
+    """
     fname = fname + ".txt"
     save_path = Path(TEXT_DIR, fname)
     with open(str(save_path), "w") as f:
@@ -44,12 +51,27 @@ def save_txt_file(extracted_text, fname):
     print(f"Text saved as {fname}")
 
 
-def grab_extract_save():
+def remove_breaks_and_dedent(input_text: str) -> str:
+    """removes newlines and trailing newlines from text, and removes indentation
+
+    Args:
+        input_text (str): raw string to have lines removed
+
+    Returns:
+        str: input text with lines removed
+    """
+    output_text = input_text.replace("\n", " ").replace("\r", "")
+    output_text = inspect.cleandoc(output_text)
+    return output_text
+
+
+def preprocess():
     pdf_list = get_pdfs(PROPOSAL_DIR)
     for file in pdf_list:
         pdf_text = extract_text(file)
+        pdf_text = remove_breaks_and_dedent(pdf_text)
         save_txt_file(pdf_text, Path(file).stem)
 
 
 if __name__ == "__main__":
-    grab_extract_save()
+    preprocess()
