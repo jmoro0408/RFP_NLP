@@ -5,32 +5,33 @@ from text_extract import TEXT_DIR
 from typing import Union
 import pandas as pd
 from scipy.sparse import hstack, vstack, csr_matrix
-
-file_token_dict = {}
+from tabulate import tabulate
 
 
 def get_txts(path: Union[Path, str]) -> list:
+    file_token_dict = {}
     txt_list = [p for p in path.rglob("*") if p.is_file() and p.match("*.txt")]
     txt_list = [str(file) for file in txt_list]
     text_titles = [Path(text).stem for text in txt_list]
-    return txt_list, text_titles
+    for text, title in zip(txt_list, text_titles):
+        if title not in file_token_dict.keys():
+            with open(text) as f:
+                lines = f.readlines()
+                file_token_dict[title] = lines
+    txt_df = pd.DataFrame.from_dict(file_token_dict, orient="index").reset_index()
+    txt_df = txt_df.rename(columns={"index": "title", 0: "content"})
+    return txt_df
 
 
-def tokenize(txt_file):
-    tfidf_vectorizer = TfidfVectorizer(input="filename", stop_words="english")
-    if not isinstance(txt_file, list):
-        txt_file = [txt_file]
-    tfidf_vector = tfidf_vectorizer.fit_transform(txt_file)
-    df_tfidf_sklearn = pd.DataFrame(
-        tfidf_vector.toarray(), columns=tfidf_vectorizer.get_feature_names_out()
-    )
-    df_tfidf_sklearn = df_tfidf_sklearn.T
-    return tfidf_vector, df_tfidf_sklearn
-
-
-def add_to_tokens_dict(title, tfidf_vector):
-    file_token_dict[title] = tfidf_vector
-    return file_token_dict
+def tokenize(text_df):
+    txt_content = text_df["content"]
+    # Create TfidfVectorizer object
+    vectorizer = TfidfVectorizer(stop_words="english")
+    # Generate matrix of word vectors
+    tfidf_matrix = vectorizer.fit_transform(txt_content)
+    # Print the shape of tfidf_matrix
+    print(f"tfidf matrix has a shape of {tfidf_matrix.shape}")
+    return tfidf_matrix
 
 
 def calculate_cosine_sim(matrix1, matrix2):
@@ -49,17 +50,7 @@ def compare_cosine(matrix1, matrix2):
 
 
 if __name__ == "__main__":
-    txts, titles = get_txts(TEXT_DIR)
-    for txt, title in zip(txts, titles):
-        if title in file_token_dict.keys():
-            continue
-        tfidf, tfidf_df = tokenize(txt)
-        add_to_tokens_dict(title, tfidf)
-
-temp_list = list(file_token_dict.keys())
-# print(
-#     calculate_cosine_sim(file_token_dict[temp_list[0]], file_token_dict[temp_list[1]])
-# )
-doc1 = file_token_dict[temp_list[0]]
-doc2 = file_token_dict[temp_list[1]]
-print(type(compare_cosine(doc1, doc2)))
+    txt_df = get_txts(TEXT_DIR)
+    tf_idf_matrix = tokenize(txt_df)
+    cosine_similarity = calculate_cosine_sim(tf_idf_matrix, tf_idf_matrix)
+    print(tabulate(cosine_similarity))
