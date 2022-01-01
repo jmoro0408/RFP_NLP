@@ -34,8 +34,7 @@ def add_to_tokens_dict(title, tfidf_vector):
 
 
 def calculate_cosine_sim(matrix1, matrix2):
-    cosine_sim = linear_kernel(matrix1, matrix2)
-    return cosine_sim
+    return linear_kernel(matrix1, matrix2)
 
 
 def compare_cosine(matrix1, matrix2):
@@ -45,6 +44,7 @@ def compare_cosine(matrix1, matrix2):
     elif matrix1.shape[1] < matrix2.shape[1]:
         matrix2 = vstack((matrix1, csr_matrix((mising_length, matrix1.shape[1]))))
     cosine_sim = calculate_cosine_sim(matrix1, matrix2)
+    print(type(matrix1))
     return cosine_sim
 
 
@@ -60,4 +60,6 @@ temp_list = list(file_token_dict.keys())
 # print(
 #     calculate_cosine_sim(file_token_dict[temp_list[0]], file_token_dict[temp_list[1]])
 # )
-print(compare_cosine(file_token_dict[temp_list[0]], file_token_dict[temp_list[1]]))
+doc1 = file_token_dict[temp_list[0]]
+doc2 = file_token_dict[temp_list[1]]
+print(type(compare_cosine(doc1, doc2)))
