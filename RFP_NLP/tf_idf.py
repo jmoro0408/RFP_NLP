@@ -4,6 +4,7 @@ from pathlib import Path
 from text_extract import TEXT_DIR
 from typing import Union
 import pandas as pd
+from scipy.sparse import hstack, vstack, csr_matrix
 
 file_token_dict = {}
 
@@ -37,6 +38,16 @@ def calculate_cosine_sim(matrix1, matrix2):
     return cosine_sim
 
 
+def compare_cosine(matrix1, matrix2):
+    mising_length = abs(matrix1.shape[1] - matrix2.shape[1])
+    if matrix1.shape[1] < matrix2.shape[1]:
+        matrix1 = vstack((matrix2, csr_matrix((mising_length, matrix2.shape[1]))))
+    elif matrix1.shape[1] < matrix2.shape[1]:
+        matrix2 = vstack((matrix1, csr_matrix((mising_length, matrix1.shape[1]))))
+    cosine_sim = calculate_cosine_sim(matrix1, matrix2)
+    return cosine_sim
+
+
 if __name__ == "__main__":
     txts, titles = get_txts(TEXT_DIR)
     for txt, title in zip(txts, titles):
@@ -44,4 +55,9 @@ if __name__ == "__main__":
             continue
         tfidf, tfidf_df = tokenize(txt)
         add_to_tokens_dict(title, tfidf)
-    print(file_token_dict)
+
+temp_list = list(file_token_dict.keys())
+# print(
+#     calculate_cosine_sim(file_token_dict[temp_list[0]], file_token_dict[temp_list[1]])
+# )
+print(compare_cosine(file_token_dict[temp_list[0]], file_token_dict[temp_list[1]]))
