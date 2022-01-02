@@ -47,14 +47,6 @@ def get_txts(path: Union[Path, str]) -> list:
 #     print(type(matrix1))
 #     return cosine_sim
 
-def read_base_document(document_filepath):
-        with open(document_filepath) as f:
-            lines = f.readlines()
-        return lines
-
-
-
-
 def process_tfidf_similarity(input_text_df, base_document):
     corpus = list(input_text_df['content'])
 	vectorizer = TfidfVectorizer()
