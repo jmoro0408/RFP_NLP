@@ -54,3 +54,4 @@ if __name__ == "__main__":
     tf_idf_matrix = tokenize(txt_df)
     cosine_similarity = calculate_cosine_sim(tf_idf_matrix, tf_idf_matrix)
     print(tabulate(cosine_similarity))
+# git test
