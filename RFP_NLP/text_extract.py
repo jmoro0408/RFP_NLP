@@ -37,7 +37,9 @@ def extract_text(pdf_file: Union[Path, str]) -> str:
     return pdf_content
 
 
-def save_txt_file(extracted_text: str, fname: Union[Path, str]):
+def save_txt_file(
+    extracted_text: str, fname: Union[Path, str], save_path: Union[Path, str]
+):
     """output text as .txt file
 
     Args:
@@ -45,7 +47,7 @@ def save_txt_file(extracted_text: str, fname: Union[Path, str]):
         fname (Union[Path, str]): target save path
     """
     fname = fname + ".txt"
-    save_path = Path(TEXT_DIR, fname)
+    save_path = Path(save_path, fname)
     with open(str(save_path), "w") as f:
         f.write(extracted_text)
     print(f"Text saved as {fname}")
@@ -72,7 +74,7 @@ def preprocess():
             continue
         pdf_text = extract_text(file)
         pdf_text = remove_breaks_and_dedent(pdf_text)
-        save_txt_file(pdf_text, Path(file).stem)
+        save_txt_file(pdf_text, Path(file).stem, TEXT_DIR)
 
 
 if __name__ == "__main__":
