@@ -1,5 +1,5 @@
 from tf_idf import get_txts, get_base_document_content, process_tfidf_similarity
-from prepare_base_doc import prepare_base_doc
+from prepare_base_doc import prepare_base_doc, BASE_DOC_DIR
 from pathlib import Path
 from text_extract import (
     get_pdfs,
@@ -38,16 +38,21 @@ def check_missing_txts():
 
 
 ## Import document to be checked
-#   -> Import PDF and output .txt
 # prepare_base_doc()
 
-## Import new .txt file
 
-## Concatenate document to be checked with corpus of documents
-
-## Process similarity with existing corpus
+def tf_idf():
+    """Creates document simililarity between base doc (to be compared) and corpus of existing texts.
+    1. Import base doc txt file
+    2. Concatenate with existing corpus of documents
+    3. Output highest scoring documents through tf-idf algorith.
+    """
+    base_doc_txt = get_base_document_content(BASE_DOC_DIR)
+    txt_df = get_txts(TEXT_DIR)
+    process_tfidf_similarity(input_text_df=txt_df, base_document=base_doc_txt)
 
 
 if __name__ == "__main__":
     check_missing_txts()
     prepare_base_doc()
+    tf_idf()
