@@ -1,10 +1,8 @@
+from pathlib import Path
+from typing import Union
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from pathlib import Path
-from text_extract import TEXT_DIR
-from typing import Union
 import pandas as pd
-from prepare_base_doc import BASE_DOC_DIR
 
 
 def get_txts(path: Union[Path, str]) -> list:
@@ -57,5 +55,6 @@ def process_tfidf_similarity(input_text_df, base_document):
         ]["title"]
     )
     print(
-        f"Most similar document by TF-IDF:{most_similar_document_title}, with the score:{round(highest_score,3)}"
+        f"Most similar document by TF-IDF:{most_similar_document_title}, \
+        with the score:{round(highest_score,3)}"
     )

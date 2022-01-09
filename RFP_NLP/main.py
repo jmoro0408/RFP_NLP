@@ -1,6 +1,6 @@
+from pathlib import Path
 from tf_idf import get_txts, get_base_document_content, process_tfidf_similarity
 from prepare_base_doc import prepare_base_doc, BASE_DOC_DIR
-from pathlib import Path
 from text_extract import (
     get_pdfs,
     PDF_DIR,
@@ -16,7 +16,8 @@ from text_extract import (
 
 
 def check_missing_txts():
-    """Compares the PDF files current analysed against any new files that may have been added since last run.
+    """Compares the PDF files current analysed against any new files
+    that may have been added since last run.
     If a new PDF has been added, this will extract the text and save a new .txt file.
     """
     list_of_pdfs = get_pdfs(PDF_DIR)  # Get a list of all PDFS to be compared against
@@ -42,7 +43,8 @@ def check_missing_txts():
 
 
 def tf_idf():
-    """Creates document simililarity between base doc (to be compared) and corpus of existing texts.
+    """Creates document simililarity between base doc (to be compared)
+    and corpus of existing texts.
     1. Import base doc txt file
     2. Concatenate with existing corpus of documents
     3. Output highest scoring documents through tf-idf algorith.
