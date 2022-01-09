@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Union
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import pandas as pd
+import itertools
 
 
 def get_txts(path: Union[Path, str]) -> list:
@@ -37,32 +37,41 @@ def get_base_document_content(base_doc_dir):
     return data
 
 
-def process_tfidf_similarity(input_text_df, base_document):
-    doc_corpus = input_text_df["content"].tolist()
+def take(n, iterable):
+    "Return first n items of the iterable as a list"
+    return list(itertools.islice(iterable, n))
+
+
+def process_tfidf_similarity(input_text_dict, base_document=None):
     vectorizer = TfidfVectorizer(lowercase=True, max_df=0.8, stop_words="english")
+
+    # input_txt_dict should be a dictionary containing documents to be compared against. keys: inidividual document titles, values: individual document content
+    doc_corpus = list(
+        input_text_dict.values()
+    )  # list of input_text_dict_values. Same length as input dict.
+    doc_corpus_combined = list(
+        itertools.chain.from_iterable(doc_corpus)
+    )  # flattening list
     # To make uniformed vectors, both documents need to be combined first.
     doc_corpus.insert(0, base_document)
+    doc_corpus_title_slices = list(
+        input_text_dict.keys()
+    )  # Have to be able to slice in order to grab the title with the highest scoring index
     embeddings = vectorizer.fit_transform(doc_corpus)
     cosine_similarities = cosine_similarity(embeddings[0:1], embeddings[1:]).flatten()
-    highest_score = 0
-    highest_score_index = 0
+    score_df_dict = {}
     for i, score in enumerate(cosine_similarities):
-        if highest_score < score:
-            highest_score = score
-            highest_score_index = i
+        score_title = doc_corpus_title_slices[i]
+        score_df_dict[score_title] = round(score, 5)
 
-    most_similar_document_content = doc_corpus[highest_score_index]
-    most_similar_document_title = str(
-        input_text_df[
-            input_text_df["content"].str.contains(
-                most_similar_document_content, case=False, regex=False
-            )
-        ]["title"]
+    sorted_score_dict = dict(
+        sorted(score_df_dict.items(), key=lambda item: item[1], reverse=True)
     )
-    print(
-        f"Most similar document by TF-IDF:{most_similar_document_title}, \
-        with the score:{round(highest_score,3)}"
-    )
+    n_scores = 10
+    top_n_scores = {k: sorted_score_dict[k] for k in list(sorted_score_dict)[:n_scores]}
+
+    print(f"Highest scoring documents are score are: {top_n_scores}")
+    return sorted_score_dict
 
 
 ## Testing
