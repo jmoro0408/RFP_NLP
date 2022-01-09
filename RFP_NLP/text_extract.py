@@ -21,7 +21,7 @@ def get_pdfs(path: Path) -> list:
     return pdf_list
 
 
-def extract_text(pdf_file: Union[Path, str]) -> str:
+def extract_text_from_pdf(pdf_file: Union[Path, str]) -> str:
     """extract text from pdf using an apache tika python wrapper
 
     Args:
@@ -70,6 +70,6 @@ def preprocess():
     for file in pdf_list:
         if Path(file).exists():  # don't duplicate files that are already processed
             continue
-        pdf_text = extract_text(file)
+        pdf_text = extract_text_from_pdf(file)
         pdf_text = remove_breaks_and_dedent(pdf_text)
         save_txt_file(pdf_text, Path(file).stem, TEXT_DIR)

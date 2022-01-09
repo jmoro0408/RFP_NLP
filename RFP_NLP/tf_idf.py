@@ -3,6 +3,7 @@ from typing import Union
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import itertools
+from pprint import pprint
 
 
 def get_txts(path: Union[Path, str]) -> list:
@@ -26,7 +27,7 @@ def get_txts(path: Union[Path, str]) -> list:
 
 
 def get_base_document_content(base_doc_dir):
-    base_doc_dir = Path(base_doc_dir)
+    base_doc_dir = Path(base_doc_dir).parent
     txt_list = [p for p in base_doc_dir.rglob("*") if p.is_file() and p.match("*.txt")]
     assert (
         len(txt_list) == 1
@@ -42,7 +43,7 @@ def take(n, iterable):
     return list(itertools.islice(iterable, n))
 
 
-def process_tfidf_similarity(input_text_dict, base_document=None):
+def process_tfidf_similarity(input_text_dict, base_document):
     vectorizer = TfidfVectorizer(lowercase=True, max_df=0.8, stop_words="english")
 
     # input_txt_dict should be a dictionary containing documents to be compared against. keys: inidividual document titles, values: individual document content
@@ -70,13 +71,5 @@ def process_tfidf_similarity(input_text_dict, base_document=None):
     n_scores = 10
     top_n_scores = {k: sorted_score_dict[k] for k in list(sorted_score_dict)[:n_scores]}
 
-    print(f"Highest scoring documents are score are: {top_n_scores}")
+    pprint(f"Highest scoring documents are score are: {top_n_scores}")
     return sorted_score_dict
-
-
-## Testing
-TEXT_DIR = Path(r"RFP_NLP/data/proposals/text_only")
-
-_test_df = get_txts(TEXT_DIR)
-
-print("done")
