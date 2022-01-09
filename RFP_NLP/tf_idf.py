@@ -69,7 +69,7 @@ def process_tfidf_similarity(
     This function takes in a dictionary of documents to be compared against, with the format:
     {doc_title : doc_content}. It compares this to the base document content to be compared.
     The function uses the sci-kit learn implementation of tf-idf:
-    (https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html)
+    (https://bit.ly/3nchURz)
 
     The function return a dictionary of the most similar documents, complete with their scores.
     The top N (currently set at 10) most similar documents are then printed, however the entire

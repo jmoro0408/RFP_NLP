@@ -61,7 +61,6 @@ def tf_idf():
 
 
 if __name__ == "__main__":
-    """Runs the entire tf_idf algorithm and outputs the most similar documents."""
     check_missing_txts()
     prepare_base_doc()
     tf_idf()
