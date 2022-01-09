@@ -1,7 +1,13 @@
+"""[summary]
+
+Returns:
+    [type]: [description]
+"""
+
+import inspect
+from typing import Union
 from pathlib import Path
 from tika import parser
-from typing import Union
-import inspect
 
 
 def get_pdfs(path: Path) -> list:
@@ -22,13 +28,14 @@ def extract_text_from_pdf(pdf_file: Union[Path, str]) -> str:
     """extract text from pdf using an apache tika python wrapper
 
     Args:
-        pdf_file (Union[Path, str]): given pdf file location as either pathlib.Path object or raw string
+        pdf_file (Union[Path, str]): given pdf file location as either
+        pathlib.Path object or raw string
 
     Returns:
         str: raw text from supplied pdf
     """
-    parsedPDF = parser.from_file(str(pdf_file))
-    pdf_content = parsedPDF["content"]
+    parsed_pdf = parser.from_file(str(pdf_file))
+    pdf_content = parsed_pdf["content"]
     return pdf_content
 
 
@@ -43,8 +50,8 @@ def save_txt_file(
     """
     fname = fname + ".txt"
     save_path = Path(save_path, fname)
-    with open(str(save_path), "w") as f:
-        f.write(extracted_text)
+    with open(str(save_path), "w", encoding="utf-8") as file:
+        file.write(extracted_text)
     print(f"Text saved as {fname}")
 
 
