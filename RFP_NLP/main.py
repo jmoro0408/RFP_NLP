@@ -1,5 +1,5 @@
 """Main file to undertake term frequency - inverse document frequency on
-a number of PDFs and a base document to compare. 
+a number of PDFs and a base document to compare.
 """
 
 from pathlib import Path
