@@ -73,7 +73,3 @@ def preprocess():
         pdf_text = extract_text(file)
         pdf_text = remove_breaks_and_dedent(pdf_text)
         save_txt_file(pdf_text, Path(file).stem, TEXT_DIR)
-
-
-if __name__ == "__main__":
-    preprocess()

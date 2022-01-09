@@ -59,9 +59,3 @@ def process_tfidf_similarity(input_text_df, base_document):
     print(
         f"Most similar document by TF-IDF:{most_similar_document_title}, with the score:{round(highest_score,3)}"
     )
-
-
-if __name__ == "__main__":
-    txt_df = get_txts(TEXT_DIR)
-    document_to_compare = get_base_document_content(BASE_DOC_DIR)
-    process_tfidf_similarity(input_text_df=txt_df, base_document=document_to_compare)
