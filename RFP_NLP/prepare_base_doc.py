@@ -1,14 +1,16 @@
 from pathlib import Path
-from typing import Union
 from text_extract import extract_text_from_pdf, save_txt_file, remove_breaks_and_dedent
-
-BASE_DOC_DIR = Path(
-    r"RFP_NLP/data/proposals/doc_to_compare/20_Jacobs Bissell Point Fine Screen Project 12548.pdf"
-)
+from doc_locations import DOC_TO_COMPARE_DIR
 
 
 def prepare_base_doc():
-    print(f"File to be compared: {Path(BASE_DOC_DIR).stem}.")
-    extracted_text = extract_text_from_pdf(BASE_DOC_DIR)
+    pdf_list = [
+        p for p in DOC_TO_COMPARE_DIR.rglob("*") if p.is_file() and p.match("*.pdf")
+    ]
+    doc_to_compare = pdf_list[0]
+    print(f"File to be compared: {Path(doc_to_compare).stem}.")
+    extracted_text = extract_text_from_pdf(doc_to_compare)
     extracted_text = remove_breaks_and_dedent(extracted_text)
-    save_txt_file(extracted_text, Path(BASE_DOC_DIR).stem, Path(BASE_DOC_DIR.parent))
+    save_txt_file(
+        extracted_text, Path(doc_to_compare).stem, Path(doc_to_compare.parent)
+    )
