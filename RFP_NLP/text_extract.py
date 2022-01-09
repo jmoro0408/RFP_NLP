@@ -63,13 +63,3 @@ def remove_breaks_and_dedent(input_text: str) -> str:
     output_text = input_text.replace("\n", " ").replace("\r", "")
     output_text = inspect.cleandoc(output_text)  # removing indentation
     return output_text
-
-
-def preprocess():
-    pdf_list = get_pdfs(PDF_DIR)
-    for file in pdf_list:
-        if Path(file).exists():  # don't duplicate files that are already processed
-            continue
-        pdf_text = extract_text_from_pdf(file)
-        pdf_text = remove_breaks_and_dedent(pdf_text)
-        save_txt_file(pdf_text, Path(file).stem, TEXT_DIR)
