@@ -1,7 +1,7 @@
-"""[summary]
-
-Returns:
-    [type]: [description]
+"""Module to house all function used to extract text from PFS.
+The pdf text extraction uses a wapper for Apache Tika, and therefore Java is required.
+See the documentation for the tika library (https://github.com/chrismattmann/tika-python)
+for further info.
 """
 
 import inspect
