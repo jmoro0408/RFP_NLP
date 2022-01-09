@@ -1,10 +1,9 @@
 from pathlib import Path
 from tf_idf import get_txts, get_base_document_content, process_tfidf_similarity
-from prepare_base_doc import prepare_base_doc, BASE_DOC_DIR
+from prepare_base_doc import prepare_base_doc
+from doc_locations import DOC_TO_COMPARE_DIR, PDF_DIR, TEXT_DIR
 from text_extract import (
     get_pdfs,
-    PDF_DIR,
-    TEXT_DIR,
     extract_text_from_pdf,
     save_txt_file,
     remove_breaks_and_dedent,
@@ -49,7 +48,7 @@ def tf_idf():
     2. Concatenate with existing corpus of documents
     3. Output highest scoring documents through tf-idf algorith.
     """
-    base_doc_txt = get_base_document_content(BASE_DOC_DIR)
+    base_doc_txt = get_base_document_content(DOC_TO_COMPARE_DIR)
     comparison_txt_dict = get_txts(TEXT_DIR)
     document_similarity = process_tfidf_similarity(
         input_text_dict=comparison_txt_dict, base_document=base_doc_txt
