@@ -27,7 +27,7 @@ def get_txts(path: Union[Path, str]) -> list:
 
 
 def get_base_document_content(base_doc_dir):
-    base_doc_dir = Path(base_doc_dir).parent
+    base_doc_dir = Path(base_doc_dir)
     txt_list = [p for p in base_doc_dir.rglob("*") if p.is_file() and p.match("*.txt")]
     assert (
         len(txt_list) == 1
@@ -44,7 +44,7 @@ def take(n, iterable):
 
 
 def process_tfidf_similarity(input_text_dict, base_document):
-    vectorizer = TfidfVectorizer(lowercase=True, max_df=0.8, stop_words="english")
+    vectorizer = TfidfVectorizer(lowercase=True, stop_words="english")
 
     # input_txt_dict should be a dictionary containing documents to be compared against. keys: inidividual document titles, values: individual document content
     doc_corpus = list(
