@@ -6,29 +6,34 @@ import pandas as pd
 
 
 def get_txts(path: Union[Path, str]) -> list:
+    path = Path(path)
     file_token_dict = {}
-    txt_list = [p for p in path.rglob("*") if p.is_file() and p.match("*.txt")]
-    txt_list = [str(file) for file in txt_list]
-    text_titles = [Path(text).stem for text in txt_list]
-    for text, title in zip(txt_list, text_titles):
-        if title not in file_token_dict.keys():
-            with open(text) as f:
-                lines = f.readlines()
-                file_token_dict[title] = lines
-    txt_df = pd.DataFrame.from_dict(file_token_dict, orient="index").reset_index()
-    txt_df = txt_df.rename(columns={"index": "title", 0: "content"})
-    return txt_df
+    txt_list = [
+        p for p in path.rglob("*") if p.is_file() and p.match("*.txt")
+    ]  # list of all txt documents in dir, in PosixPath format.
+    txt_titles = [
+        Path(text).stem for text in txt_list
+    ]  # grab the titles, with no parent path or file extension
+    # iterate through list of txts, read the file and grab the content, and attach the conen twith the title to a dict
+    for txt_file, title in zip(txt_list, txt_titles):
+        if (
+            title not in file_token_dict.keys()
+        ):  # only reads items that haven't been added
+            with open(txt_file, "r") as file:
+                content = file.read().replace("\n", "")
+                file_token_dict[title] = content
+    return file_token_dict
 
 
-def get_base_document_content(TEXT_DIR):
-    TEXT_DIR = Path(TEXT_DIR.parent)
-    txt_list = [p for p in TEXT_DIR.rglob("*") if p.is_file() and p.match("*.txt")]
+def get_base_document_content(base_doc_dir):
+    base_doc_dir = Path(base_doc_dir)
+    txt_list = [p for p in base_doc_dir.rglob("*") if p.is_file() and p.match("*.txt")]
     assert (
         len(txt_list) == 1
     ), "Please ensure only one file is being provided for comparison"
     txt_file = txt_list[0]
     with open(txt_file) as f:
-        data = f.read()
+        data = f.read().replace("\n", "")
     return data
 
 
