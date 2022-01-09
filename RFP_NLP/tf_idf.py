@@ -33,11 +33,11 @@ def get_base_document_content(TEXT_DIR):
 
 
 def process_tfidf_similarity(input_text_df, base_document):
-    corpus = input_text_df["content"].tolist()
-    vectorizer = TfidfVectorizer(stop_words="english")
+    doc_corpus = input_text_df["content"].tolist()
+    vectorizer = TfidfVectorizer(lowercase=True, max_df=0.8, stop_words="english")
     # To make uniformed vectors, both documents need to be combined first.
-    corpus.insert(0, base_document)
-    embeddings = vectorizer.fit_transform(corpus)
+    doc_corpus.insert(0, base_document)
+    embeddings = vectorizer.fit_transform(doc_corpus)
     cosine_similarities = cosine_similarity(embeddings[0:1], embeddings[1:]).flatten()
     highest_score = 0
     highest_score_index = 0
@@ -46,7 +46,7 @@ def process_tfidf_similarity(input_text_df, base_document):
             highest_score = score
             highest_score_index = i
 
-    most_similar_document_content = corpus[highest_score_index]
+    most_similar_document_content = doc_corpus[highest_score_index]
     most_similar_document_title = str(
         input_text_df[
             input_text_df["content"].str.contains(
@@ -58,3 +58,11 @@ def process_tfidf_similarity(input_text_df, base_document):
         f"Most similar document by TF-IDF:{most_similar_document_title}, \
         with the score:{round(highest_score,3)}"
     )
+
+
+## Testing
+TEXT_DIR = Path(r"RFP_NLP/data/proposals/text_only")
+
+_test_df = get_txts(TEXT_DIR)
+
+print("done")
