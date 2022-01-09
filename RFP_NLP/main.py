@@ -1,7 +1,14 @@
 from tf_idf import get_txts, get_base_document_content, process_tfidf_similarity
 from prepare_base_doc import *
 from pathlib import Path
-from text_extract import get_pdfs, PDF_DIR, TEXT_DIR, extract_text, save_txt_file
+from text_extract import (
+    get_pdfs,
+    PDF_DIR,
+    TEXT_DIR,
+    extract_text,
+    save_txt_file,
+    remove_breaks_and_dedent,
+)
 
 
 ## Check analysed PDFs for any missing
@@ -16,12 +23,12 @@ def check_missing_txts():
     list_of_txts = get_txts(TEXT_DIR)[
         "title"
     ].to_list()  # Get list of PDFs that have already been analysed
-
+    new_txts_analysed = 0
     for pdf in list_of_pdfs:
-        pdf = Path(pdf).stem
-        new_txts_analysed = 0
-        if pdf not in list_of_txts:
+        pdf_no_suffix = Path(pdf).stem
+        if pdf_no_suffix not in list_of_txts:
             new_txt_file = extract_text(pdf)
+            new_txt_file = remove_breaks_and_dedent(new_txt_file)
             save_txt_file(new_txt_file, Path(pdf).stem, TEXT_DIR)
             new_txts_analysed += 1
     print(f"{new_txts_analysed} new text file(s) added")
