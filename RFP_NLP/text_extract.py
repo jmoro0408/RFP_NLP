@@ -3,9 +3,7 @@ from tika import parser
 from typing import Union
 import inspect
 
-PROPOSAL_DIR = Path(
-    r"/Users/jamesmoro/Documents/Python/RFP_NLP/RFP_NLP/data/proposals/raw"
-)
+PDF_DIR = Path(r"/Users/jamesmoro/Documents/Python/RFP_NLP/RFP_NLP/data/proposals/raw")
 TEXT_DIR = Path(r"RFP_NLP/data/proposals/text_only")
 
 
@@ -68,7 +66,7 @@ def remove_breaks_and_dedent(input_text: str) -> str:
 
 
 def preprocess():
-    pdf_list = get_pdfs(PROPOSAL_DIR)
+    pdf_list = get_pdfs(PDF_DIR)
     for file in pdf_list:
         if Path(file).exists():  # don't duplicate files that are already processed
             continue

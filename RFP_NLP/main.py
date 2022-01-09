@@ -39,7 +39,7 @@ def check_missing_txts():
 
 ## Import document to be checked
 #   -> Import PDF and output .txt
-
+# prepare_base_doc()
 
 ## Import new .txt file
 
