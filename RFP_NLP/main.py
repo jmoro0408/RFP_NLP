@@ -1,5 +1,5 @@
 from tf_idf import get_txts, get_base_document_content, process_tfidf_similarity
-from prepare_base_doc import *
+from prepare_base_doc import prepare_base_doc
 from pathlib import Path
 from text_extract import (
     get_pdfs,
@@ -50,3 +50,4 @@ def check_missing_txts():
 
 if __name__ == "__main__":
     check_missing_txts()
+    prepare_base_doc()
