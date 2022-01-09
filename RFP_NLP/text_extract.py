@@ -3,9 +3,6 @@ from tika import parser
 from typing import Union
 import inspect
 
-PDF_DIR = Path(r"/Users/jamesmoro/Documents/Python/RFP_NLP/RFP_NLP/data/proposals/raw")
-TEXT_DIR = Path(r"RFP_NLP/data/proposals/text_only")
-
 
 def get_pdfs(path: Path) -> list:
     """generated a list of all pdf files in given directory (recursive)
