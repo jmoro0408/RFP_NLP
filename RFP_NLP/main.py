@@ -31,11 +31,15 @@ def check_missing_txts():
             new_txt_file = remove_breaks_and_dedent(new_txt_file)
             save_txt_file(new_txt_file, Path(pdf).stem, TEXT_DIR)
             new_txts_analysed += 1
-    print(f"{new_txts_analysed} new text file(s) added")
+    if new_txts_analysed == 0:
+        print("No new PDFs found")
+    else:
+        print(f"{new_txts_analysed} new text files added")
 
 
 ## Import document to be checked
 #   -> Import PDF and output .txt
+
 
 ## Import new .txt file
 
