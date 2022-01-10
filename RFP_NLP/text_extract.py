@@ -64,6 +64,6 @@ def remove_breaks_and_dedent(input_text: str) -> str:
     Returns:
         str: input text with lines removed
     """
-    output_text = input_text.replace("\n", " ").replace("\r", "")
+    output_text = input_text.replace("\n", "").replace("\r", "")
     output_text = inspect.cleandoc(output_text)  # removing indentation
     return output_text
