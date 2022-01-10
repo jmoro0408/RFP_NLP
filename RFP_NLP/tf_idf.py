@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Union
 import itertools
 from pprint import pprint
-from doc_locations import STOP_WORDS_DIR
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import nltk
@@ -117,5 +116,7 @@ def process_tfidf_similarity(
         k: sorted_score_dict[k] for k in list(sorted_score_dict)[:top_n_docs]
     }
 
-    pprint(f"Highest scoring documents are score are: {top_n_scores}")
+    pprint(
+        f"Highest scoring documents are score are: {top_n_scores}"
+    )
     return sorted_score_dict
