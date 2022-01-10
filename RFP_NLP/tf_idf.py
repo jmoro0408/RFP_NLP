@@ -5,8 +5,11 @@ from pathlib import Path
 from typing import Union
 import itertools
 from pprint import pprint
+from doc_locations import STOP_WORDS_DIR
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import nltk
+from nltk.corpus import stopwords
 
 
 def get_txts(path: Union[Path, str]) -> dict:
@@ -82,7 +85,13 @@ def process_tfidf_similarity(
     Returns:
         dict: dict of most sorted document similarity with format title : score
     """
-    vectorizer = TfidfVectorizer(lowercase=True, stop_words="english")
+    # Using the nltk stopwords corpus instead of the sklearn built in stopwords,
+    # see https://bit.ly/3tdqsLQ for reasoning behind this
+    nltk.download("stopwords")
+    nltk_stop_words = stopwords.words("english")
+    # nltk_stop_words = [word.decode("utf-8") for word in stopwords.words("english")]
+
+    vectorizer = TfidfVectorizer(stop_words=nltk_stop_words)
 
     # input_txt_dict should be a dictionary containing documents to be compared against.
     # keys: inidividual document titles, values: individual document content
