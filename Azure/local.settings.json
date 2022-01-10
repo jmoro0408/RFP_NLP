@@ -1,0 +1,10 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "DefaultEndpointsProtocol=https;AccountName=storageaccountrfpnlab4b;AccountKey=sM1OXF0tqk4CB4borr5HfgA9VExEcj+lv+u9mxW5+f5u9aDTUZx5VJo4HaaZFh7kN6/3rmxGYKZydvag2L7Cdg==;EndpointSuffix=core.windows.net",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "FUNCTIONS_EXTENSION_VERSION": "~4",
+    "APPINSIGHTS_INSTRUMENTATIONKEY": "7a6f31be-6098-49f4-aba7-77707e8489f3",
+    "APPLICATIONINSIGHTS_CONNECTION_STRING": "InstrumentationKey=7a6f31be-6098-49f4-aba7-77707e8489f3;IngestionEndpoint=https://westus-0.in.applicationinsights.azure.com/"
+  }
+}
