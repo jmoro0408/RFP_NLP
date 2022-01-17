@@ -1,6 +1,5 @@
 import os
 from dotenv import load_dotenv
-import os
 from azure.storage.blob import (
     BlobServiceClient,
     __version__,
@@ -10,67 +9,93 @@ from azure.cognitiveservices.vision.computervision import ComputerVisionClient
 from azure.cognitiveservices.vision.computervision.models import OperationStatusCodes
 from azure.cognitiveservices.vision.computervision.models import VisualFeatureTypes
 from msrest.authentication import CognitiveServicesCredentials
-from array import array
-from PIL import Image
-import sys
 import time
 
-load_dotenv()  # take environment variables from .env.
 
-blob_key = os.getenv('BLOB_KEY')
-blob_sas_token = os.getenv('BLOB_SAS_TOKEN')
-blob_connect_str = os.getenv('BLOB_CONNECT_STR')
-vision_key = os.getenv('COMPUTER_VISION_KEY')
-vision_endpoint = os.getenv('COMPUTER_VISION_ENDPOINT')
+def start_blob_service_client(connection_str:str):
+    return BlobServiceClient.from_connection_string(connection_str)
 
-# Create the BlobServiceClient object which will be used to get the container_client
-blob_service_client = BlobServiceClient.from_connection_string(blob_connect_str)
-# Container client for raw container.
-raw_container_client = blob_service_client.get_container_client("raw-proposal")
-rfp_raw_container_client = blob_service_client.get_container_client("raw-rfp")
-# Container client for processed container
-processed_container_client = blob_service_client.get_container_client("processed-proposal")
-# Get base url for container.
-proposal_raw_UrlBase = raw_container_client.primary_endpoint
-rfp_raw_Urlbase = rfp_raw_container_client.primary_endpoint
-print(proposal_raw_UrlBase)
-print("\nProcessing blobs...")
-blob_list = rfp_raw_container_client.list_blobs()
+def start_blob_container_client(blob_name:str, blobserviceclient):
+    try:
+         return blobserviceclient.get_container_client(blob_name)
+    except NameError:
+        print("Blob service client not found, \
+            please ensure a service client instance is running")
 
-computervision_client = ComputerVisionClient(vision_endpoint, CognitiveServicesCredentials(vision_key))
+def get_blob_url(container_client, blob_sas_token):
+    """Returns a dictionary of blob urls for a particular container
+        The url will point directly to the raw pdf
 
-#Download blobs
-for idx, blob in enumerate(blob_list):
-    if idx ==0: #just try the one for now
-        print(blob.name)
-        blob_filename = str(blob.name).replace(".pdf", "")
-        blob_url = rfp_raw_Urlbase + "/" + blob.name + "?" + blob_sas_token
-        '''
-        OCR: Read File using the Read API, extract text - remote
-        This example will extract text in an image, then print results, line by line.
-        This API call can also extract handwriting style text (not shown).
-        '''
-        print("===== Read File - remote =====")
-        # Get an image with text
+    Args:
+        container_client ([type]): Azure container client instance
+        blob_sas_token ([type]): sas token for the particular container
 
-        # Call API with URL and raw response (allows you to get the operation location)
-        read_response = computervision_client.read(blob_url,  raw=True)
+    Returns:
+        dict: ditionary of blob names and their urls
+    """
+    endpoint = container_client.primary_endpoint
+    blob_list = container_client.list_blobs()
+    blob_url_dict = {}
+    for blob in blob_list:
+        blob_url = endpoint + "/" + blob.name + "?" + blob_sas_token
+        blob_url_dict[blob.name] = blob_url
+    return blob_url_dict
 
-        # Get the operation location (URL with an ID at the end) from the response
-        read_operation_location = read_response.headers["Operation-Location"]
-        # Grab the ID from the URL
-        operation_id = read_operation_location.split("/")[-1]
 
-        # Call the "GET" API and wait for it to retrieve the results
-        while True:
-            read_result = computervision_client.get_read_result(operation_id)
-            if read_result.status not in ['notStarted', 'running']:
-                break
-            time.sleep(1)
 
-        # Print the detected text, line by line
-        if read_result.status == OperationStatusCodes.succeeded:
-            for text_result in read_result.analyze_result.read_results:
-                with open(f'{blob_filename}.txt', 'w') as f:
-                   for line in text_result.lines:
-                       f.write(f'{line.text}\n')
+def start_computervision_client(computer_vision_key, computer_vision_endpoint):
+    return ComputerVisionClient(computer_vision_endpoint, CognitiveServicesCredentials(computer_vision_key))
+
+def call_read_api(blob_url, computervision_client):
+    print("======= Text Extraction =======")
+    # Call API with URL and raw response (allows you to get the operation location)
+    read_response = computervision_client.read(blob_url,  raw=True)
+    # Get the operation location (URL with an ID at the end) from the response
+    read_operation_location = read_response.headers["Operation-Location"]
+    # Grab the ID from the URL
+    operation_id = read_operation_location.split("/")[-1]
+    # Call the "GET" API and wait for it to retrieve the results
+    while True:
+        read_result = computervision_client.get_read_result(operation_id)
+        if read_result.status not in ['notStarted', 'running']:
+            break
+        time.sleep(1)
+    return read_result
+
+def save_read_result(read_result, save_filename):
+    # save the detected text, line by line
+    if read_result.status == OperationStatusCodes.succeeded:
+        for text_result in read_result.analyze_result.read_results:
+            with open(f'{save_filename}.txt', 'w') as f:
+                for line in text_result.lines:
+                    f.write(f'{line.text}\n')
+        print(f'Extracted text saved as {save_filename}.txt')
+
+
+def main():
+    load_dotenv()
+    blob_key = os.getenv('BLOB_KEY')
+    blob_sas_token = os.getenv('BLOB_SAS_TOKEN')
+    blob_connect_str = os.getenv('BLOB_CONNECT_STR')
+    vision_key = os.getenv('COMPUTER_VISION_KEY')
+    vision_endpoint = os.getenv('COMPUTER_VISION_ENDPOINT')
+
+    # Start service container for entie storage
+    blob_service_client = start_blob_service_client(blob_connect_str)
+
+    #start computer vision client instance
+    computervision_client = start_computervision_client(vision_key, vision_endpoint)
+
+    # get raw base doc (rfp) input
+    raw_rf_container_client = start_blob_container_client('raw-rfp', blob_service_client)
+    raw_rfp_url = list(get_blob_url(raw_rf_container_client, blob_sas_token).values())[0]
+    raw_rfp_filename = list(get_blob_url(raw_rf_container_client, blob_sas_token).keys())[0]
+    raw_rfp_filename = os.path.splitext(raw_rfp_filename)[0]
+
+    #get raw rfp text
+    rfp_read_result = call_read_api(raw_rfp_url, computervision_client)
+
+    #save extracted text
+    save_read_result(rfp_read_result, raw_rfp_filename)
+
+main()
