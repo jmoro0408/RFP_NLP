@@ -61,14 +61,24 @@ def call_read_api(blob_url, computervision_client):
         time.sleep(1)
     return read_result
 
-def save_read_result(read_result, save_filename):
+def save_read_result(read_result, save_filename, local = True, upload_container_client = None):
     # save the detected text, line by line
     if read_result.status == OperationStatusCodes.succeeded:
+        raw_text = []
         for text_result in read_result.analyze_result.read_results:
+            for line in text_result.lines:
+                raw_text.append(line.text)
+        raw_text = "\n".join(raw_text)
+        if local:
             with open(save_filename, 'w') as f:
-                for line in text_result.lines:
-                    f.write(f'{line.text}\n')
-        print(f'Extracted text saved as {save_filename}.txt')
+                    f.write(raw_text)
+            print(f'Extracted text saved as {save_filename}')
+        else:
+            assert upload_container_client is not None, "If local is False, a suitable upload container client must be provided"
+            print(f'======= Uploading to {upload_container_client.container_name} container =======')
+            upload_container_client.upload_blob(name = save_filename, data = raw_text, overwrite = True)
+            print(f'File {save_filename} successfully saved to {upload_container_client.container_name}')
+
 
 def upload_to_container(container_client, filename):
     print(f'======= Uploading to {container_client.container_name} container =======')
@@ -86,6 +96,9 @@ def main():
     # Start service container for entie storage
     storage_service_client = start_storage_service_client(storage_connect_str)
 
+     #start processed rfp container client
+    processed_rfp_container_client = start_container_client('processed-rfp', storage_service_client)
+
     #start computer vision client instance
     computervision_client = start_computervision_client(vision_key, vision_endpoint)
 
@@ -93,17 +106,15 @@ def main():
     raw_rfp_container_client = start_container_client('raw-rfp', storage_service_client)
     raw_rfp_url = list(get_blob_url(raw_rfp_container_client, storage_sas_token).values())[0]
     raw_rfp_filename = list(get_blob_url(raw_rfp_container_client, storage_sas_token).keys())[0]
-    raw_rfp_filename = os.path.splitext(raw_rfp_filename)[0] + '.txt'
+    raw_rfp_filename = os.path.splitext(raw_rfp_filename)[0] +'.txt'
 
     #get raw rfp text
-    #rfp_read_result = call_read_api(raw_rfp_url, computervision_client)
+    rfp_read_result = call_read_api(raw_rfp_url, computervision_client)
 
     #save extracted text
-    #save_read_result(rfp_read_result, raw_rfp_filename)
+    save_read_result(rfp_read_result, raw_rfp_filename, local = False, upload_container_client=processed_rfp_container_client)
 
-    #upload to process rfp container
-    processed_rfp_container_client = start_container_client('processed-rfp', storage_service_client)
-    filepath = r'/Users/jamesmoro/Documents/Python/RFP_NLP/RFP_Func/sample.txt'
-    upload_to_container(processed_rfp_container_client, raw_rfp_filename)
 
 main()
+
+
