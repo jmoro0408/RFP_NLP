@@ -86,6 +86,13 @@ def upload_to_container(container_client, filename):
         container_client.upload_blob(name = filename, data = upload_data)
     print(f'File {filename} successfully saved to {container_client.container_name}')
 
+def prepare_rfp_file(container_client, sas_token):
+    raw_rfp_url = list(get_blob_url(container_client, sas_token).values())[0]
+    raw_rfp_filename = list(get_blob_url(container_client, sas_token).keys())[0]
+    raw_rfp_filename = os.path.splitext(raw_rfp_filename)[0] +'.txt'
+    return raw_rfp_url, raw_rfp_filename
+
+
 def main():
     load_dotenv()
     storage_sas_token = os.getenv('STORAGE_SAS_TOKEN')
@@ -96,17 +103,16 @@ def main():
     # Start service container for entie storage
     storage_service_client = start_storage_service_client(storage_connect_str)
 
-     #start processed rfp container client
+     #start container client to hold processed rfps
     processed_rfp_container_client = start_container_client('processed-rfp', storage_service_client)
+    #start container client to hold raw rfps
+    raw_rfp_container_client = start_container_client('raw-rfp', storage_service_client)
 
     #start computer vision client instance
     computervision_client = start_computervision_client(vision_key, vision_endpoint)
 
     # get raw base doc (rfp) input
-    raw_rfp_container_client = start_container_client('raw-rfp', storage_service_client)
-    raw_rfp_url = list(get_blob_url(raw_rfp_container_client, storage_sas_token).values())[0]
-    raw_rfp_filename = list(get_blob_url(raw_rfp_container_client, storage_sas_token).keys())[0]
-    raw_rfp_filename = os.path.splitext(raw_rfp_filename)[0] +'.txt'
+    raw_rfp_url, raw_rfp_filename = prepare_rfp_file(raw_rfp_container_client, storage_sas_token)
 
     #get raw rfp text
     rfp_read_result = call_read_api(raw_rfp_url, computervision_client)
