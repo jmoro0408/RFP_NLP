@@ -12,10 +12,10 @@ from msrest.authentication import CognitiveServicesCredentials
 import time
 
 
-def start_blob_service_client(connection_str:str):
+def start_storage_service_client(connection_str:str):
     return BlobServiceClient.from_connection_string(connection_str)
 
-def start_blob_container_client(blob_name:str, blobserviceclient):
+def start_container_client(blob_name:str, blobserviceclient):
     try:
          return blobserviceclient.get_container_client(blob_name)
     except NameError:
@@ -40,7 +40,6 @@ def get_blob_url(container_client, blob_sas_token):
         blob_url = endpoint + "/" + blob.name + "?" + blob_sas_token
         blob_url_dict[blob.name] = blob_url
     return blob_url_dict
-
 
 
 def start_computervision_client(computer_vision_key, computer_vision_endpoint):
@@ -79,22 +78,21 @@ def upload_to_container(container_client, filename):
 
 def main():
     load_dotenv()
-    blob_key = os.getenv('BLOB_KEY')
-    blob_sas_token = os.getenv('BLOB_SAS_TOKEN')
-    blob_connect_str = os.getenv('BLOB_CONNECT_STR')
+    storage_sas_token = os.getenv('STORAGE_SAS_TOKEN')
+    storage_connect_str = os.getenv('STORAGE_CONNECT_STR')
     vision_key = os.getenv('COMPUTER_VISION_KEY')
     vision_endpoint = os.getenv('COMPUTER_VISION_ENDPOINT')
 
     # Start service container for entie storage
-    blob_service_client = start_blob_service_client(blob_connect_str)
+    storage_service_client = start_storage_service_client(storage_connect_str)
 
     #start computer vision client instance
     computervision_client = start_computervision_client(vision_key, vision_endpoint)
 
     # get raw base doc (rfp) input
-    raw_rfp_container_client = start_blob_container_client('raw-rfp', blob_service_client)
-    raw_rfp_url = list(get_blob_url(raw_rfp_container_client, blob_sas_token).values())[0]
-    raw_rfp_filename = list(get_blob_url(raw_rfp_container_client, blob_sas_token).keys())[0]
+    raw_rfp_container_client = start_container_client('raw-rfp', storage_service_client)
+    raw_rfp_url = list(get_blob_url(raw_rfp_container_client, storage_sas_token).values())[0]
+    raw_rfp_filename = list(get_blob_url(raw_rfp_container_client, storage_sas_token).keys())[0]
     raw_rfp_filename = os.path.splitext(raw_rfp_filename)[0] + '.txt'
 
     #get raw rfp text
@@ -104,7 +102,7 @@ def main():
     #save_read_result(rfp_read_result, raw_rfp_filename)
 
     #upload to process rfp container
-    processed_rfp_container_client = start_blob_container_client('processed-rfp', blob_service_client)
+    processed_rfp_container_client = start_container_client('processed-rfp', storage_service_client)
     filepath = r'/Users/jamesmoro/Documents/Python/RFP_NLP/RFP_Func/sample.txt'
     upload_to_container(processed_rfp_container_client, raw_rfp_filename)
 
