@@ -18,10 +18,25 @@ def prepare_processed_proposals(container_client, sas_token):
     for fname, blob in zip(_filenames, blob_list):
         download_stream = container_client.download_blob(blob)
         content = download_stream.readall()
-        content = content.read().replace("\n", "")
+        content = str(content).replace("\n", "")
         proposal_content_dict[fname] = content
 
     return proposal_content_dict
+
+def prepare_content_dict(container_client):
+    content_dict = {}
+    blob_list = container_client.list_blobs()
+    print(f'===== Downloading {container_client.container_name} text =====')
+    for blob in blob_list:
+        download_stream = container_client.download_blob(blob)
+        content = download_stream.readall()
+        content = str(content).replace("\n", "")
+        fname = os.path.splitext(blob.name)[0]
+        content_dict[fname] = content
+    return content_dict
+
+def prepare_processed_rfp(container_client):
+    pass
 
 
 def main():
@@ -38,8 +53,11 @@ def main():
     #start container client to hold processed rfps
     processed_proposal_container_client = start_container_client('processed-proposal', storage_service_client)
 
-    #start container client to hold raw rfps
-    processed_proposals_dict = prepare_processed_proposals(processed_proposal_container_client, storage_sas_token)
+    #create dict of processed proposals and their content
+    processed_proposals_dict = prepare_content_dict(processed_proposal_container_client)
+
+    #create dict of filename and content for processed rfp
+    processed_rfp_dict = prepare_content_dict(processed_rfp_container_client)
 
 
 main()
