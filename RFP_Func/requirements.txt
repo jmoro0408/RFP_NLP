@@ -2,3 +2,4 @@ azure-storage-blob==12.9.0
 azure-core==1.21.1
 azure-cognitiveservices-vision-computervision==0.9.0
 pillow
+nlkt
