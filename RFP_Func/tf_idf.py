@@ -4,7 +4,7 @@ from pprint import pprint
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from dotenv import load_dotenv
-from azure_read import (
+from azure_read_api import (
     start_storage_service_client,
     start_container_client,
 )
