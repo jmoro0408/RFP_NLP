@@ -1,12 +1,19 @@
+"""
+Module to utilise the azure computer vision OCR function for PDFs.
+Also contains general functions used to access blob storage and generally interact with Azure.
+Within the RFP_NLP project this module handles the text extraction form the base doc (rfp) and
+saving to a seperate blob.
+"""
+
+# TODO: Write docstrings
+
 import os
+import time
 from dotenv import load_dotenv
 from azure.storage.blob import BlobServiceClient
-
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
 from azure.cognitiveservices.vision.computervision.models import OperationStatusCodes
-from azure.cognitiveservices.vision.computervision.models import VisualFeatureTypes
 from msrest.authentication import CognitiveServicesCredentials
-import time
 
 
 def start_storage_service_client(connection_str: str):
@@ -14,13 +21,7 @@ def start_storage_service_client(connection_str: str):
 
 
 def start_container_client(blob_name: str, blobserviceclient):
-    try:
-        return blobserviceclient.get_container_client(blob_name)
-    except NameError:
-        print(
-            "Blob service client not found, \
-            please ensure a service client instance is running"
-        )
+    return blobserviceclient.get_container_client(blob_name)
 
 
 def get_blob_url(container_client, blob_sas_token):
@@ -77,8 +78,8 @@ def save_read_result(
                 raw_text.append(line.text)
         raw_text = "\n".join(raw_text)
         if local:
-            with open(save_filename, "w") as f:
-                f.write(raw_text)
+            with open(save_filename, "w", encoding="utf-8") as file:
+                file.write(raw_text)
             print(f"Extracted text saved as {save_filename}")
         else:
             assert (

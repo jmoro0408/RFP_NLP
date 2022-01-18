@@ -4,12 +4,13 @@ from pprint import pprint
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from dotenv import load_dotenv
-from azure.storage.blob import BlobServiceClient
 from azure_read import (
     start_storage_service_client,
     start_container_client,
-    get_blob_url,
 )
+
+# TODO: Add a function to delete the uploaded rfp pdf and txt file once the tf idf algorithm is completed
+# TODO: Write docstrings
 
 
 def prepare_content_dict(container_client):
@@ -26,8 +27,8 @@ def prepare_content_dict(container_client):
 
 
 def read_stopwords(stopwords_dir):
-    with open(stopwords_dir) as f:
-        lines = f.read().splitlines()
+    with open(stopwords_dir, encoding="utf8") as file:
+        lines = file.read().splitlines()
     return lines
 
 
@@ -49,7 +50,7 @@ def process_tfidf_similarity(
 
     Args:
         input_text_dict (dict): Dict with titles and content of documents to be compared against
-        base_document (dict): dictionary containig filename and content of base document to be compared
+        base_document (dict): dict containing filename and content of base document to be compared
 
     Returns:
         json: json of most sorted document similarity with format title : score
@@ -93,7 +94,6 @@ def process_tfidf_similarity(
 
 def main():
     load_dotenv()
-    storage_sas_token = os.getenv("STORAGE_SAS_TOKEN")
     storage_connect_str = os.getenv("STORAGE_CONNECT_STR")
 
     # Start service container for entie storage
@@ -113,7 +113,7 @@ def main():
     # Get stopwords for english
     nltk_stopwords = read_stopwords(os.path.join(os.getcwd(), "english.txt"))
     # conduct tf_idf comparison
-    documnet_similarity_json = process_tfidf_similarity(
+    document_similarity_json = process_tfidf_similarity(
         input_text_dict=processed_proposals_dict,
         base_document_dict=processed_rfp_dict,
         stopwords=nltk_stopwords,
