@@ -5,15 +5,17 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from dotenv import load_dotenv
 from azure.storage.blob import BlobServiceClient
-from azure_read import (start_storage_service_client,
-                        start_container_client,
-                        get_blob_url)
+from azure_read import (
+    start_storage_service_client,
+    start_container_client,
+    get_blob_url,
+)
 
 
 def prepare_content_dict(container_client):
     content_dict = {}
     blob_list = container_client.list_blobs()
-    print(f'===== Downloading {container_client.container_name} text =====')
+    print(f"===== Downloading {container_client.container_name} text =====")
     for blob in blob_list:
         download_stream = container_client.download_blob(blob)
         content = download_stream.readall()
@@ -22,13 +24,18 @@ def prepare_content_dict(container_client):
         content_dict[fname] = content
     return content_dict
 
+
 def read_stopwords(stopwords_dir):
     with open(stopwords_dir) as f:
         lines = f.read().splitlines()
     return lines
 
+
 def process_tfidf_similarity(
-    input_text_dict: dict, base_document_dict: dict, stopwords:list, top_n_docs: int = 10,
+    input_text_dict: dict,
+    base_document_dict: dict,
+    stopwords: list,
+    top_n_docs: int = 10,
 ) -> dict:
     """Function to undertake the tf-idf similirity processing.
     This function takes in a dictionary of documents to be compared against, with the format:
@@ -58,7 +65,9 @@ def process_tfidf_similarity(
         input_text_dict.values()
     )  # list of input_text_dict_values. Same length as input dict.
     # To make uniformed vectors, both documents need to be combined first.
-    base_document_content = list(base_document_dict.values())[0] #discarding filename of base doc
+    base_document_content = list(base_document_dict.values())[
+        0
+    ]  # discarding filename of base doc
     doc_corpus.insert(0, base_document_content)
     doc_corpus_title_slices = list(
         input_text_dict.keys()
@@ -77,33 +86,39 @@ def process_tfidf_similarity(
         k: sorted_score_dict[k] for k in list(sorted_score_dict)[:top_n_docs]
     }
 
-    top_scores_json = json.dumps(top_n_scores, indent = 4)
-    pprint(
-        f"Highest scoring documents are score are: {top_n_scores}"
-    )
+    top_scores_json = json.dumps(top_n_scores, indent=4)
+    pprint(f"Highest scoring documents are score are: {top_n_scores}")
     return top_scores_json
+
 
 def main():
     load_dotenv()
-    storage_sas_token = os.getenv('STORAGE_SAS_TOKEN')
-    storage_connect_str = os.getenv('STORAGE_CONNECT_STR')
+    storage_sas_token = os.getenv("STORAGE_SAS_TOKEN")
+    storage_connect_str = os.getenv("STORAGE_CONNECT_STR")
 
     # Start service container for entie storage
     storage_service_client = start_storage_service_client(storage_connect_str)
-    #start container client to hold processed rfps
-    processed_rfp_container_client = start_container_client('processed-rfp', storage_service_client)
-    #start container client to hold processed rfps
-    processed_proposal_container_client = start_container_client('processed-proposal', storage_service_client)
-    #create dict of processed proposals and their content
+    # start container client to hold processed rfps
+    processed_rfp_container_client = start_container_client(
+        "processed-rfp", storage_service_client
+    )
+    # start container client to hold processed rfps
+    processed_proposal_container_client = start_container_client(
+        "processed-proposal", storage_service_client
+    )
+    # create dict of processed proposals and their content
     processed_proposals_dict = prepare_content_dict(processed_proposal_container_client)
-    #create dict of filename and content for processed rfp
+    # create dict of filename and content for processed rfp
     processed_rfp_dict = prepare_content_dict(processed_rfp_container_client)
-    #Get stopwords for english
-    nltk_stopwords = read_stopwords(os.path.join(os.getcwd(), 'english.txt'))
-    #conduct tf_idf comparison
-    documnet_similarity_json = process_tfidf_similarity(input_text_dict = processed_proposals_dict,
-                            base_document_dict = processed_rfp_dict,
-                            stopwords = nltk_stopwords)
+    # Get stopwords for english
+    nltk_stopwords = read_stopwords(os.path.join(os.getcwd(), "english.txt"))
+    # conduct tf_idf comparison
+    documnet_similarity_json = process_tfidf_similarity(
+        input_text_dict=processed_proposals_dict,
+        base_document_dict=processed_rfp_dict,
+        stopwords=nltk_stopwords,
+    )
+
 
 if __name__ == "__main__":
     main()
