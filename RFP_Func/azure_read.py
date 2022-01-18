@@ -1,9 +1,6 @@
 import os
 from dotenv import load_dotenv
-from azure.storage.blob import (
-    BlobServiceClient,
-    __version__,
-)
+from azure.storage.blob import BlobServiceClient
 
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
 from azure.cognitiveservices.vision.computervision.models import OperationStatusCodes
@@ -121,6 +118,5 @@ def main():
     save_read_result(rfp_read_result, raw_rfp_filename, local = False, upload_container_client=processed_rfp_container_client)
 
 
-main()
-
-
+if __name__ == "__main__":
+    main()
