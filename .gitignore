@@ -1,9 +1,9 @@
 #my stuff
 RFP_NLP_local/data/proposals/
 /RFP_Func/Old Stuff
-/Azure/local.settings.json
-/Azure/HelperFuncs/.env
-
+Azure/local.settings.json
+Azure/HelperFuncs/.env
+local_only
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
