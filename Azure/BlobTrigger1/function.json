@@ -1,0 +1,12 @@
+{
+  "scriptFile": "__init__.py",
+  "bindings": [
+    {
+      "name": "myblob",
+      "type": "blobTrigger",
+      "direction": "in",
+      "path": "raw-rfp/{name}",
+      "connection": "rfpnlpworkspac7030084694_STORAGE"
+    }
+  ]
+}
