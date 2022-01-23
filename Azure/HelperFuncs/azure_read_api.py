@@ -6,6 +6,7 @@ saving to a seperate blob.
 """
 
 # TODO: Write docstrings
+# TODO: The get_blob_url funciton is messy, I thinbk there is a way to generate sas tokens on the fly - should look into that
 
 import sys
 import os
@@ -30,7 +31,8 @@ def start_container_client(blob_name: str, blobserviceclient):
 
 
 def get_blob_url(container_client, blob_sas_token):
-    """Returns a dictionary of blob urls for a particular container
+    """
+    Returns a dictionary of blob urls for a particular container
         The url will point directly to the raw pdf
 
     Args:
@@ -44,7 +46,10 @@ def get_blob_url(container_client, blob_sas_token):
     blob_list = container_client.list_blobs()
     blob_url_dict = {}
     for blob in blob_list:
-        blob_url = endpoint + "/" + blob.name + "?" + blob_sas_token
+        if str(blob_sas_token).startswith("?"):
+            blob_url = endpoint + "/" + blob.name + blob_sas_token
+        else:
+            blob_url = endpoint + "/" + blob.name + "?" + blob_sas_token
         blob_url_dict[blob.name] = blob_url
     return blob_url_dict
 
@@ -114,6 +119,15 @@ def prepare_rfp_file(container_client, sas_token):
     raw_rfp_filename = os.path.splitext(raw_rfp_filename)[0] + ".txt"
     return raw_rfp_url, raw_rfp_filename
 
+def delete_blob(container_client, blob_name):
+    if os.path.splitext(blob_name)[1] != '.pdf':
+        blob_name = os.path.splitext(blob_name)[0] + '.pdf'
+    blob_client = container_client.get_blob_client(blob_name)
+    blob_client.delete_blob()
+    print(f'{blob_name} deleted from {container_client.container_name}')
+
+
+
 
 def read_main():
     load_dotenv()
@@ -150,6 +164,7 @@ def read_main():
         local=False,
         upload_container_client=processed_rfp_container_client,
     )
+    delete_blob(raw_rfp_container_client, raw_rfp_filename)
 
 
 # if __name__ == "__main__":
