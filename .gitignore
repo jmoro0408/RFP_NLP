@@ -4,6 +4,7 @@ RFP_NLP_local/data/proposals/
 Azure/local.settings.json
 Azure/HelperFuncs/.env
 local_only
+Azure/Powerapps
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
