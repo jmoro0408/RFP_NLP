@@ -93,7 +93,7 @@ def process_tfidf_similarity(
     }
 
     top_scores_json = json.dumps(top_n_scores, indent=4)
-    pprint(f"Highest scoring documents are score are: {top_n_scores}")
+    #pprint(f"Highest scoring documents are score are: {top_n_scores}")
     return top_scores_json
 
 

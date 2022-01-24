@@ -7,6 +7,13 @@
       "direction": "in",
       "path": "raw-rfp/{name}",
       "connection": "rfpnlpworkspac7030084694_STORAGE"
+    },
+    {
+      "name": "outputblob",
+      "type": "blob",
+      "direction": "out",
+      "path": "results/{name}.json",
+      "connection": "rfpnlpworkspac7030084694_STORAGE"
     }
   ]
 }
