@@ -5,6 +5,7 @@ Azure/local.settings.json
 Azure/HelperFuncs/.env
 local_only
 Azure/Powerapps
+venv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
