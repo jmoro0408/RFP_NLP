@@ -164,8 +164,8 @@ def read_main():
         local=False,
         upload_container_client=processed_rfp_container_client,
     )
-    delete_blob(raw_rfp_container_client, raw_rfp_filename)
+    #delete_blob(raw_rfp_container_client, raw_rfp_filename)
 
 
-# if __name__ == "__main__":
-#     read_main()
+if __name__ == "__main__":
+    read_main()

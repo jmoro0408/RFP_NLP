@@ -2,18 +2,19 @@
   "scriptFile": "__init__.py",
   "bindings": [
     {
-      "name": "myblob",
-      "type": "blobTrigger",
+      "authLevel": "function",
+      "type": "httpTrigger",
       "direction": "in",
-      "path": "raw-rfp/{name}",
-      "connection": "rfpnlpworkspac7030084694_STORAGE"
+      "name": "req",
+      "methods": [
+        "get",
+        "post"
+      ]
     },
     {
-      "name": "outputblob",
-      "type": "blob",
+      "type": "http",
       "direction": "out",
-      "path": "results/{name}.json",
-      "connection": "rfpnlpworkspac7030084694_STORAGE"
+      "name": "$return"
     }
   ]
 }
