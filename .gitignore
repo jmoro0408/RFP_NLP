@@ -6,6 +6,8 @@ Azure/HelperFuncs/.env
 local_only
 Azure/Powerapps
 venv
+Azure/Testing
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
