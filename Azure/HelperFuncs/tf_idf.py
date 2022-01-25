@@ -14,7 +14,7 @@ from azure_read_api import (
     start_container_client,
 )
 
-# TODO: Add a function to delete the uploaded rfp pdf and txt file once the tf idf algorithm is completed
+
 # TODO: Write docstrings
 
 
