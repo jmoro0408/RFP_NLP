@@ -91,8 +91,11 @@ def process_tfidf_similarity(
     top_n_scores = {
         k: sorted_score_dict[k] for k in list(sorted_score_dict)[:top_n_docs]
     }
+    docs = list(top_n_scores.keys())
+    scores = list(top_n_scores.values())
+    top_scores_doc_score = {'doc':docs, 'score':scores}
 
-    top_scores_json = json.dumps(top_n_scores, indent=4)
+    top_scores_json = json.dumps(top_scores_doc_score, indent=4)
     #pprint(f"Highest scoring documents are score are: {top_n_scores}")
     return top_scores_json
 
