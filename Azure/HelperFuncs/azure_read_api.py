@@ -127,8 +127,6 @@ def delete_blob(container_client, blob_name):
     print(f'{blob_name} deleted from {container_client.container_name}')
 
 
-
-
 def read_main():
     load_dotenv()
     storage_sas_token = os.getenv("STORAGE_SAS_TOKEN")
@@ -143,6 +141,8 @@ def read_main():
     processed_rfp_container_client = start_container_client(
         "processed-rfp", storage_service_client
     )
+
+
     # start container client to hold raw rfps
     raw_rfp_container_client = start_container_client("raw-rfp", storage_service_client)
 
@@ -164,6 +164,7 @@ def read_main():
         local=False,
         upload_container_client=processed_rfp_container_client,
     )
+
     delete_blob(raw_rfp_container_client, raw_rfp_filename)
 
 

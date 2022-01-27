@@ -14,9 +14,7 @@ from azure_read_api import (
     start_container_client,
 )
 
-
 # TODO: Write docstrings
-
 
 def prepare_content_dict(container_client):
     content_dict = {}
@@ -114,6 +112,11 @@ def tf_idf_main():
     processed_proposal_container_client = start_container_client(
         "processed-proposal", storage_service_client
     )
+    #start container client to hold results
+    results_container_client = start_container_client(
+        "results", storage_service_client
+    )
+
     # create dict of processed proposals and their content
     processed_proposals_dict = prepare_content_dict(processed_proposal_container_client)
     # create dict of filename and content for processed rfp
@@ -126,6 +129,18 @@ def tf_idf_main():
         base_document_dict=processed_rfp_dict,
         stopwords=nltk_stopwords,
     )
+    rfp_name = list(processed_rfp_dict.keys())[0]
+    results_container_client.upload_blob(name =
+                                        rfp_name + '.json',
+                                        data = document_similarity_json, overwrite = True)
+
+
+    processed_rfp_blobs = []
+    for blob in processed_rfp_container_client.list_blobs():
+        processed_rfp_blobs.append(blob)
+    processed_rfp_blob_client = processed_rfp_container_client.get_blob_client(processed_rfp_blobs[0])
+    processed_rfp_blob_client.delete_blob()
+
     return document_similarity_json
 
 # if __name__ == "__main__":
