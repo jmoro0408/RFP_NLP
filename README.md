@@ -22,6 +22,8 @@ The project focused on the deployment of the algorithm into a serverless archite
 ## Architecture
 ***
 
+![Rough Architecture flowchart](https://raw.githubusercontent.com/jmoro0408/RFP_NLP/main/Azure/HelperFuncs/Architecture.png?token=GHSAT0AAAAAABP4RZBHSQZDX6WSZKIGVXYQYPXC6XQ)
+
 Initially, all proposals which are to be compared against must have their text extracted and uploaded to Azure blob storage. I used a  python package ([tika](https://pypi.org/project/tika/)) to do this locally and upload manually, however the Microsoft Computervision API could be accessed to allow uploading and extracting of new proposals in future.
 
 The end user interacts with a basic Powerapps App that allows the uploading of a new RFP (referred to as the 'base document') into Azure blob storage. From here an Azure Function is triggered to begin analyzing the new base document.
@@ -35,8 +37,6 @@ The most similar documents have their titles saved along with relative scores in
 A power automate flow then reads this results json file and delivers the most similar documents and scores back to the end user.
 
 
-## TF-IDF
-***
 
 
 
