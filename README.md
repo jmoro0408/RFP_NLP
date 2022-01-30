@@ -22,7 +22,7 @@ The project focused on the deployment of the algorithm into a serverless archite
 ## Architecture
 ***
 
-![Rough Architecture flowchart](https://raw.githubusercontent.com/jmoro0408/RFP_NLP/main/Azure/HelperFuncs/Architecture.png?token=GHSAT0AAAAAABP4RZBHSQZDX6WSZKIGVXYQYPXC6XQ)
+![Rough Architecture flowchart](https://raw.githubusercontent.com/jmoro0408/RFP_NLP/main/Azure/HelperFuncs/Architecture.png?token=GHSAT0AAAAAABP4RZBH5RDN7PO3VMZAFSIMYPXDESQ)
 
 Initially, all proposals which are to be compared against must have their text extracted and uploaded to Azure blob storage. I used a  python package ([tika](https://pypi.org/project/tika/)) to do this locally and upload manually, however the Microsoft Computervision API could be accessed to allow uploading and extracting of new proposals in future.
 
