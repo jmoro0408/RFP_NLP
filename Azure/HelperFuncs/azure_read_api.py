@@ -3,30 +3,53 @@ Module to utilise the azure computer vision OCR function for PDFs.
 Also contains general functions used to access blob storage and generally interact with Azure.
 Within the RFP_NLP project this module handles the text extraction form the base doc (rfp) and
 saving to a seperate blob.
+
+
+Note, several clients are started through this func and their naming can be somewhat confusing.
+The storage service client refers to the most upper level storage, in which individual
+containers are housed.
+The container client refers to individual containers which house individual files (blobs).
+The blob client refers to individial files within containers.
+
+I'm not sure if this naming is consistent with Microsoft, but it has worked for me.
 """
 
-# TODO: Write docstrings
-# TODO: The get_blob_url funciton is messy, I thinbk there is a way to generate sas tokens on the fly - should look into that
 
+import time
 import sys
 import os
-sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
-
-
-import os
-import time
 from dotenv import load_dotenv
 from azure.storage.blob import BlobServiceClient
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
 from azure.cognitiveservices.vision.computervision.models import OperationStatusCodes
 from msrest.authentication import CognitiveServicesCredentials
 
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
+
 
 def start_storage_service_client(connection_str: str):
+    """Start a client assosciated with a blob storage account.
+
+    Args:
+        connection_str (str): Connection string assosciated with the account.
+        Obtained from Azure Portal.
+
+    Returns:
+        BlobServiceClient: Started blob service client.
+    """
     return BlobServiceClient.from_connection_string(connection_str)
 
 
 def start_container_client(blob_name: str, blobserviceclient):
+    """Start a client assosciated with an individual storage account container.
+
+    Args:
+        blob_name (str): Name of blob to start client for
+        blobserviceclient (BlobServiceClient): Blob storage account client (started).
+
+    Returns:
+        ContainerClient: Container client (started)
+    """
     return blobserviceclient.get_container_client(blob_name)
 
 
@@ -54,13 +77,36 @@ def get_blob_url(container_client, blob_sas_token):
     return blob_url_dict
 
 
-def start_computervision_client(computer_vision_key, computer_vision_endpoint):
+def start_computervision_client(
+    computer_vision_key: str, computer_vision_endpoint: str
+):
+    """Start a computer vision client instance
+
+    Args:
+        computer_vision_key (str): Computer vision key. Obtained from Azure Portal
+        computer_vision_endpoint (str): Computer vision endpoint. Obtained from Azure Portal.
+
+    Returns:
+        ComputerVisionClient: Instance of computer vision client (started)
+    """
     return ComputerVisionClient(
         computer_vision_endpoint, CognitiveServicesCredentials(computer_vision_key)
     )
 
 
-def call_read_api(blob_url, computervision_client):
+def call_read_api(blob_url: str, computervision_client):
+    """Callcs the computer vision API on an uploaded PDF.
+    This func takes a url of  apdf located in blob storage as an arument. It then processes
+    this using optical character recognition and returns the text.
+
+    Args:
+        blob_url (str): direct URL of PDF to be analysed. Will likely need the SAS token appended
+        depending on your auth settings
+        computervision_client (ComputervisionClient): Computer vision client instance (started)
+
+    Returns:
+        str: Text extracted from PDF at blob_url
+    """
     print("======= Starting Text Extraction =======")
     # Call API with URL and raw response (allows you to get the operation location)
     read_response = computervision_client.read(blob_url, raw=True)
@@ -78,8 +124,23 @@ def call_read_api(blob_url, computervision_client):
 
 
 def save_read_result(
-    read_result, save_filename, local=True, upload_container_client=None
+    read_result: str,
+    save_filename: str,
+    local: bool = True,
+    upload_container_client=None,
 ):
+    """Saves a read result either locally on uploads to a blob container.
+
+    Args:
+        read_result (str): Tex tto be saved.
+        save_filename (str): Name of file to be saved
+        local (bool, optional): Save to local folder or not. If True, read_result
+        is saved to the same folder as this .py file. Defaults to True.
+
+        upload_container_client (ContainerClient, optional):
+        Required if local=False. Container Client instance assosciated with the contianer the
+        read result is to be saved to. Defaults to None.
+    """
     # save the detected text, line by line
     if read_result.status == OperationStatusCodes.succeeded:
         raw_text = []
@@ -102,32 +163,66 @@ def save_read_result(
                 name=save_filename, data=raw_text, overwrite=True
             )
             print(
-                f"File {save_filename} successfully saved to {upload_container_client.container_name}"
+                f"File {save_filename} successfully saved to \
+                    {upload_container_client.container_name}"
             )
 
 
-def upload_to_container(container_client, filename):
+def upload_to_container(container_client, filename: str):
+    """Uploads a file to a given container
+
+    Args:
+        container_client (ContainerClient): ContainerClient Instance assosciated with the container
+        the file is to be saved to.
+        filename (str): file name of file to be uploaded.
+    """
+
     print(f"======= Uploading to {container_client.container_name} container =======")
     with open(filename, "rb") as upload_data:
         container_client.upload_blob(name=filename, data=upload_data)
     print(f"File {filename} successfully saved to {container_client.container_name}")
 
 
-def prepare_rfp_file(container_client, sas_token):
+def prepare_rfp_file(container_client, sas_token: str):
+    """Func is specific to this RFP application.
+    Get the direct url to the rfp to be analysed
+
+    Args:
+        container_client (ContainerClient): ContainerClient Instance assosciated with the container
+        housing the rfp to be analysed.
+        sas_token (str): sas token of the PDF file. Obtained from Azure Portal.
+
+    Returns:
+        tuple: (rfp direct url, rfp filename)
+    """
     raw_rfp_url = list(get_blob_url(container_client, sas_token).values())[0]
     raw_rfp_filename = list(get_blob_url(container_client, sas_token).keys())[0]
     raw_rfp_filename = os.path.splitext(raw_rfp_filename)[0] + ".txt"
     return raw_rfp_url, raw_rfp_filename
 
-def delete_blob(container_client, blob_name):
-    if os.path.splitext(blob_name)[1] != '.pdf':
-        blob_name = os.path.splitext(blob_name)[0] + '.pdf'
+
+def delete_blob(container_client, blob_name: str):
+    """Delete a blob.
+
+    Args:
+        container_client (ContainerClient): ContainerClient Instance assosciated with the container
+        housing the blob to be deleted.
+        blob_name (str): blob name to be deleted.
+    """
+    if os.path.splitext(blob_name)[1] != ".pdf":
+        blob_name = os.path.splitext(blob_name)[0] + ".pdf"
     blob_client = container_client.get_blob_client(blob_name)
     blob_client.delete_blob()
-    print(f'{blob_name} deleted from {container_client.container_name}')
+    print(f"{blob_name} deleted from {container_client.container_name}")
 
 
 def read_main():
+    """Main function. Loads secret keys and endpoints from environment variable and called
+    the above functions to process an uploaded RFP.
+    The func takes an uploaded RFP, extracts the text, saves the text in a new container,
+    and deletes the original RFP PDF
+
+    """
     load_dotenv()
     storage_sas_token = os.getenv("STORAGE_SAS_TOKEN")
     storage_connect_str = os.getenv("STORAGE_CONNECT_STR")
@@ -141,7 +236,6 @@ def read_main():
     processed_rfp_container_client = start_container_client(
         "processed-rfp", storage_service_client
     )
-
 
     # start container client to hold raw rfps
     raw_rfp_container_client = start_container_client("raw-rfp", storage_service_client)
