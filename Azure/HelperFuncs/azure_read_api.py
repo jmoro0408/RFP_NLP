@@ -18,41 +18,11 @@ import sys
 import os
 from typing import Dict
 from dotenv import load_dotenv
-from azure.storage.blob import BlobServiceClient, ContainerClient
+from azure.storage.blob import ContainerClient
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
 from azure.cognitiveservices.vision.computervision.models import OperationStatusCodes
-from msrest.authentication import CognitiveServicesCredentials
-
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
-
-
-def start_storage_service_client(connection_str: str) -> BlobServiceClient:
-    """Start a client assosciated with a blob storage account.
-
-    Args:
-        connection_str (str): Connection string assosciated with the account.
-        Obtained from Azure Portal.
-
-    Returns:
-        BlobServiceClient: Started blob service client.
-    """
-    return BlobServiceClient.from_connection_string(connection_str)
-
-
-def start_container_client(
-    blob_name: str, blobserviceclient: BlobServiceClient
-) -> ContainerClient:
-    """Start a client assosciated with an individual storage account container.
-
-    Args:
-        blob_name (str): Name of blob to start client for
-        blobserviceclient (BlobServiceClient): Blob storage account client (started).
-
-    Returns:
-        ContainerClient: Container client (started)
-    """
-    return blobserviceclient.get_container_client(blob_name)
-
+from service_management import ServiceManagement
 
 def get_blob_url(
     container_client: ContainerClient, blob_sas_token: str
@@ -78,23 +48,6 @@ def get_blob_url(
             blob_url = endpoint + "/" + blob.name + "?" + blob_sas_token
         blob_url_dict[blob.name] = blob_url
     return blob_url_dict
-
-
-def start_computervision_client(
-    computer_vision_key: str, computer_vision_endpoint: str
-) -> ComputerVisionClient:
-    """Start a computer vision client instance
-
-    Args:
-        computer_vision_key (str): Computer vision key. Obtained from Azure Portal
-        computer_vision_endpoint (str): Computer vision endpoint. Obtained from Azure Portal.
-
-    Returns:
-        ComputerVisionClient: Instance of computer vision client (started)
-    """
-    return ComputerVisionClient(
-        computer_vision_endpoint, CognitiveServicesCredentials(computer_vision_key)
-    )
 
 
 def call_read_api(blob_url: str, computervision_client: ComputerVisionClient):
@@ -237,18 +190,24 @@ def read_main(delete_after_process: bool = True):
     vision_endpoint = os.getenv("COMPUTER_VISION_ENDPOINT")
 
     # Start service container for entie storage
-    storage_service_client = start_storage_service_client(storage_connect_str)
+    storage_service_client = ServiceManagement.start_storage_service_client(
+        storage_connect_str
+    )
 
     # start container client to hold processed rfps
-    processed_rfp_container_client = start_container_client(
+    processed_rfp_container_client = ServiceManagement.start_container_client(
         "processed-rfp", storage_service_client
     )
 
     # start container client to hold raw rfps
-    raw_rfp_container_client = start_container_client("raw-rfp", storage_service_client)
+    raw_rfp_container_client = ServiceManagement.start_container_client(
+        "raw-rfp", storage_service_client
+    )
 
     # start computer vision client instance
-    computervision_client = start_computervision_client(vision_key, vision_endpoint)
+    computervision_client = ServiceManagement.start_computervision_client(
+        vision_key, vision_endpoint
+    )
 
     # get raw base doc (rfp) input
     raw_rfp_url, raw_rfp_filename = prepare_rfp_file(

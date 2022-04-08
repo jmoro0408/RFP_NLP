@@ -10,14 +10,8 @@ import json
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from dotenv import load_dotenv
-
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
-
-from azure_read_api import (
-    start_storage_service_client,
-    start_container_client,
-)
-
+from service_management import ServiceManagement
 
 def read_container_blobs_content(container_client):
     """
@@ -132,17 +126,18 @@ def tf_idf_main():
     storage_connect_str = os.getenv("STORAGE_CONNECT_STR")
 
     # Start service container for entie storage
-    storage_service_client = start_storage_service_client(storage_connect_str)
+    storage_service_client = ServiceManagement.start_storage_service_client(storage_connect_str)
+
     # start container client to hold processed rfps
-    processed_rfp_container_client = start_container_client(
+    processed_rfp_container_client =  ServiceManagement.start_container_client(
         "processed-rfp", storage_service_client
     )
     # start container client to hold processed rfps
-    processed_proposal_container_client = start_container_client(
+    processed_proposal_container_client =  ServiceManagement.start_container_client(
         "processed-proposal", storage_service_client
     )
     # start container client to hold results
-    results_container_client = start_container_client("results", storage_service_client)
+    results_container_client =  ServiceManagement.start_container_client("results", storage_service_client)
 
     # create dict of processed proposals and their content
     processed_proposals_dict = read_container_blobs_content(
