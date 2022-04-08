@@ -13,13 +13,12 @@ The blob client refers to individial files within containers.
 
 I'm not sure if this naming is consistent with Microsoft, but it has worked for me.
 """
-
-
 import time
 import sys
 import os
+from typing import Dict
 from dotenv import load_dotenv
-from azure.storage.blob import BlobServiceClient
+from azure.storage.blob import BlobServiceClient, ContainerClient
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
 from azure.cognitiveservices.vision.computervision.models import OperationStatusCodes
 from msrest.authentication import CognitiveServicesCredentials
@@ -27,7 +26,7 @@ from msrest.authentication import CognitiveServicesCredentials
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 
 
-def start_storage_service_client(connection_str: str):
+def start_storage_service_client(connection_str: str) -> BlobServiceClient:
     """Start a client assosciated with a blob storage account.
 
     Args:
@@ -40,7 +39,9 @@ def start_storage_service_client(connection_str: str):
     return BlobServiceClient.from_connection_string(connection_str)
 
 
-def start_container_client(blob_name: str, blobserviceclient):
+def start_container_client(
+    blob_name: str, blobserviceclient: BlobServiceClient
+) -> ContainerClient:
     """Start a client assosciated with an individual storage account container.
 
     Args:
@@ -53,7 +54,9 @@ def start_container_client(blob_name: str, blobserviceclient):
     return blobserviceclient.get_container_client(blob_name)
 
 
-def get_blob_url(container_client, blob_sas_token):
+def get_blob_url(
+    container_client: ContainerClient, blob_sas_token: str
+) -> Dict[str, str]:
     """
     Returns a dictionary of blob urls for a particular container
         The url will point directly to the raw pdf
@@ -79,7 +82,7 @@ def get_blob_url(container_client, blob_sas_token):
 
 def start_computervision_client(
     computer_vision_key: str, computer_vision_endpoint: str
-):
+) -> ComputerVisionClient:
     """Start a computer vision client instance
 
     Args:
@@ -94,7 +97,7 @@ def start_computervision_client(
     )
 
 
-def call_read_api(blob_url: str, computervision_client):
+def call_read_api(blob_url: str, computervision_client: ComputerVisionClient):
     """Callcs the computer vision API on an uploaded PDF.
     This func takes a url of  apdf located in blob storage as an arument. It then processes
     this using optical character recognition and returns the text.
@@ -168,7 +171,7 @@ def save_read_result(
             )
 
 
-def upload_to_container(container_client, filename: str):
+def upload_to_container(container_client: ContainerClient, filename: str):
     """Uploads a file to a given container
 
     Args:
@@ -183,7 +186,7 @@ def upload_to_container(container_client, filename: str):
     print(f"File {filename} successfully saved to {container_client.container_name}")
 
 
-def prepare_rfp_file(container_client, sas_token: str):
+def prepare_rfp_file(container_client: ContainerClient, sas_token: str):
     """Func is specific to this RFP application.
     Get the direct url to the rfp to be analysed
 
@@ -201,7 +204,7 @@ def prepare_rfp_file(container_client, sas_token: str):
     return raw_rfp_url, raw_rfp_filename
 
 
-def delete_blob(container_client, blob_name: str):
+def delete_blob(container_client: ContainerClient, blob_name: str):
     """Delete a blob.
 
     Args:
@@ -216,11 +219,15 @@ def delete_blob(container_client, blob_name: str):
     print(f"{blob_name} deleted from {container_client.container_name}")
 
 
-def read_main():
+def read_main(delete_after_process: bool = True):
     """Main function. Loads secret keys and endpoints from environment variable and called
     the above functions to process an uploaded RFP.
     The func takes an uploaded RFP, extracts the text, saves the text in a new container,
-    and deletes the original RFP PDF
+    and, depending on the delete_after_process argument, deletes the original RFP PDF.
+
+    ** Arguments **
+    delete_after_process (bool): Deletes the uploaded RFP from the raw_rfp folder after procesing.
+    Typically True to avoid the container filling up with old RFPs.
 
     """
     load_dotenv()
@@ -258,9 +265,9 @@ def read_main():
         local=False,
         upload_container_client=processed_rfp_container_client,
     )
+    if delete_after_process:
+        delete_blob(raw_rfp_container_client, raw_rfp_filename)
 
-    delete_blob(raw_rfp_container_client, raw_rfp_filename)
 
-
-# if __name__ == "__main__":
-#     read_main()
+if __name__ == "__main__":
+    read_main(delete_after_process=True)
