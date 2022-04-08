@@ -12,8 +12,10 @@ from sklearn.metrics.pairwise import cosine_similarity
 from dotenv import load_dotenv
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 from service_management import ServiceManagement
+from azure.storage.blob import ContainerClient
+from typing import Dict
 
-def read_container_blobs_content(container_client):
+def read_container_blobs_content(container_client: ContainerClient) -> Dict[str,str]:
     """
     Iterates through all blob files in a container and reads the content (text).
     The filename and content are then appended to a dictionary.
@@ -36,7 +38,7 @@ def read_container_blobs_content(container_client):
     return content_dict
 
 
-def read_stopwords(stopwords_dir: str):
+def read_stopwords(stopwords_dir: str) -> str:
     """Reads stopwords file.
     Typically would download nltk stowrds with each run, but storing them within a
     text file within the local directory was cleaner for this project.
@@ -58,7 +60,7 @@ def process_tfidf_similarity(
     base_document_dict: dict,
     stopwords: list,
     top_n_docs: int = 10,
-) -> dict:
+) -> Dict[str,int]:
     """Function to undertake the tf-idf similirity processing.
     This function takes in a dictionary of documents to be compared against, with the format:
     {doc_title : doc_content}. It compares this to the base document content to be compared.
