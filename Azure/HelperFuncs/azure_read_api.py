@@ -18,11 +18,11 @@ import sys
 import os
 from typing import Dict
 from dotenv import load_dotenv
-from azure.storage.blob import ContainerClient
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
 from azure.cognitiveservices.vision.computervision.models import OperationStatusCodes
-sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
+from azure.storage.blob import ContainerClient
 from service_management import ServiceManagement
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 
 def get_blob_url(
     container_client: ContainerClient, blob_sas_token: str
@@ -39,6 +39,8 @@ def get_blob_url(
         dict: ditionary of blob names and their urls
     """
     endpoint = container_client.primary_endpoint
+    load_dotenv()
+    blob_url_ = os.getenv("blob_url")
     blob_list = container_client.list_blobs()
     blob_url_dict = {}
     for blob in blob_list:
@@ -51,8 +53,8 @@ def get_blob_url(
 
 
 def call_read_api(blob_url: str, computervision_client: ComputerVisionClient):
-    """Callcs the computer vision API on an uploaded PDF.
-    This func takes a url of  apdf located in blob storage as an arument. It then processes
+    """Calls the computer vision API on an uploaded PDF.
+    This func takes a url of  a pdf located in blob storage as an argument. It then processes
     this using optical character recognition and returns the text.
 
     Args:
@@ -229,4 +231,4 @@ def read_main(delete_after_process: bool = True):
 
 
 if __name__ == "__main__":
-    read_main(delete_after_process=True)
+    read_main(delete_after_process=False)
